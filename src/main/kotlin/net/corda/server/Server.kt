@@ -3,9 +3,6 @@ package net.corda.server
 import org.springframework.boot.Banner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.web.socket.config.annotation.AbstractWebSocketMessageBrokerConfigurer
-import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
-import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 
 
 /**

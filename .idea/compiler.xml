@@ -37,6 +37,8 @@
       <module name="shared_test" target="1.8" />
       <module name="spring-observable-stream_main" target="1.8" />
       <module name="spring-observable-stream_test" target="1.8" />
+      <module name="spring-webserver_main" target="1.8" />
+      <module name="spring-webserver_test" target="1.8" />
       <module name="spring_main" target="1.8" />
       <module name="spring_test" target="1.8" />
       <module name="web-server-common_main" target="1.8" />
