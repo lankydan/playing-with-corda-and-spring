@@ -19,7 +19,7 @@ import net.corda.states.IOUState
 class IOUContract : Contract {
 		companion object {
 				@JvmStatic
-				val IOU_CONTRACT_ID = "net.corda.training.contract.IOUContract"
+				val IOU_CONTRACT_ID = "net.corda.contracts.IOUContract"
 		}
 
 		/**

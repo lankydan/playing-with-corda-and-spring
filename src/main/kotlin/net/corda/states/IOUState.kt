@@ -19,22 +19,22 @@ import java.util.*
  *   except at issuance/termination.
  */
 data class IOUState(val amount: Amount<Currency>,
-										val lender: Party,
-										val borrower: Party,
-										val paid: Amount<Currency> = Amount(0, amount.token),
-										override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
-		/**
-		 *  This property holds a list of the nodes which can "use" this state in a valid transaction. In this case, the
-		 *  lender or the borrower.
-		 */
-		override val participants: List<Party> get() = listOf(lender, borrower)
+                    val lender: Party,
+                    val borrower: Party,
+                    val paid: Amount<Currency> = Amount(0, amount.token),
+                    override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
+    /**
+     *  This property holds a list of the nodes which can "use" this state in a valid transaction. In this case, the
+     *  lender or the borrower.
+     */
+    override val participants: List<Party> get() = listOf(lender, borrower)
 
-		/**
-		 * Helper methods for when building transactions for settling and transferring IOUs.
-		 * - [pay] adds an amount to the paid property. It does no validation.
-		 * - [withNewLender] creates a copy of the current state with a newly specified lender. For use when transferring.
-		 */
-		fun pay(amountToPay: Amount<Currency>) = copy(paid = paid.plus(amountToPay))
+    /**
+     * Helper methods for when building transactions for settling and transferring IOUs.
+     * - [pay] adds an amount to the paid property. It does no validation.
+     * - [withNewLender] creates a copy of the current state with a newly specified lender. For use when transferring.
+     */
+    fun pay(amountToPay: Amount<Currency>) = copy(paid = paid.plus(amountToPay))
 
-		fun withNewLender(newLender: Party) = copy(lender = newLender)
+    fun withNewLender(newLender: Party) = copy(lender = newLender)
 }
