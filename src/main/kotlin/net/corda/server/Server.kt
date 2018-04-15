@@ -11,12 +11,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 @SpringBootApplication
 private open class Starter
 
+fun main(args: Array<String>) {
+    SpringApplication.run(Starter::class.java)
+}
 /**
  * Starts our Spring Boot application.
  */
-fun main(args: Array<String>) {
-    val app = SpringApplication(Starter::class.java)
-    app.setBannerMode(Banner.Mode.OFF)
-    app.isWebEnvironment = true
-    app.run(*args)
-}
+//fun main(args: Array<String>) {
+//    val app = SpringApplication(Starter::class.java)
+//    app.setBannerMode(Banner.Mode.OFF)
+//    app.isWebEnvironment = true
+//    app.run(*args)
+//}

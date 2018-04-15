@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="info">
-
+    <!--java -Dlog4j.configurationFile=C:\Development\corda\spring-webserver\config\dev\log4j2.xml -jar corda.jar-->
     <Properties>
         <Property name="log-path">logs</Property>
-        <Property name="log-name">node-${hostName}</Property>
+        <Property name="log-name">node-${hostName}-does-this-work</Property>
         <Property name="archive">${log-path}/archive</Property>
     </Properties>
 
