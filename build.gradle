@@ -1,12 +1,15 @@
 buildscript {
     ext.corda_release_group = 'net.corda'
-    ext.corda_release_version = 'corda-3.0'
+//    ext.corda_release_version = 'corda-3.0'
+    ext.corda_release_version = '3.1-corda'
     ext.corda_gradle_plugins_version = '3.0.9'
     ext.kotlin_version = '1.1.60'
     ext.junit_version = '4.12'
     ext.quasar_version = '0.7.9'
     ext.spring_boot_version = '1.5.7.RELEASE'
+//    ext.spring_boot_version = '1.5.12.RELEASE'
     ext.spring_version = '4.3.11.RELEASE'
+//    ext.spring_version = '4.3.16.RELEASE'
     //    ext.spring_boot_version = '2.0.0.RELEASE'
     //    ext.spring_version = '5.0.0.RELEASE'
 
@@ -54,19 +57,53 @@ dependencies {
     cordaCompile "$corda_release_group:corda-jackson:$corda_release_version"
     //    cordaCompile "$corda_release_group:corda-rpc:$corda_release_version"
     cordaCompile "$corda_release_group:corda-node-api:$corda_release_version"
-    cordaCompile "$corda_release_group:corda-webserver-impl:$corda_release_version"
+    cordaCompile("$corda_release_group:corda-webserver-impl:$corda_release_version") {
+        exclude group: 'org.eclipse.jetty', module: 'jetty-webapp'
+        exclude group: 'org.eclipse.jetty', module: 'jetty-servlet'
+        exclude group: 'org.eclipse.jetty', module: 'jersey-container-jetty-http'
+        exclude group: 'org.eclipse.jetty', module: 'jetty-continuation'
+        exclude group: 'org.glassfish.jersey.containers', module: 'jersey-container-jetty-http'
+    }
+
+
     //    cordaRuntime "$corda_release_group:corda:$corda_release_version"
-    cordaRuntime "$corda_release_group:corda-webserver:$corda_release_version"
+//    cordaRuntime "$corda_release_group:corda-webserver:$corda_release_version"
 
     testCompile "$corda_release_group:corda-test-utils:$corda_release_version"
     testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
     cordapp "$corda_release_group:corda-finance:$corda_release_version"
 
-    compile("org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version") {
-        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+    compile("org.springframework.boot:spring-boot-starter-tomcat:$spring_boot_version")
+    compile("org.springframework.boot:spring-boot-starter-web:$spring_boot_version") {
+        //        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+        exclude group: 'org.slf4j', module: 'slf4j'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
     }
-//    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.11.0'
+    compile("org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version") {
+//        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+        exclude group: 'org.slf4j', module: 'slf4j'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+    }
+//    compile group: 'org.springframework', name: 'spring-messaging', version: '4.2.4.RELEASE'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.11.0'
+    compile("org.webjars:stomp-websocket:2.3.3")
+    compile group: 'org.webjars', name: 'webjars-locator-core', version: '0.35'
+//    compile group: 'javax.websocket', name: 'javax.websocket-api', version: '1.1'
+//    compile group: 'org.apache.tomcat', name: 'tomcat7-websocket', version: '7.0.47'
+    compile("org.webjars:sockjs-client:1.0.2")
+    compile("org.webjars:bootstrap:3.3.7")
+    compile("org.webjars:jquery:3.1.0")
+//    compile.exclude  module: 'spring-boot-starter-jetty'
+}
+
+jar {
+    baseName = 'gs-messaging-stomp-websocket'
+    version =  '0.1.0'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

@@ -27,24 +27,24 @@ private const val CORDA_RPC_PORT = "config.rpc.port"
  */
 @Component
 open class NodeRPCConnection(
-				@Value("\${$CORDA_NODE_HOST}") private val host: String,
-				@Value("\${$CORDA_USER_NAME}") private val username: String,
-				@Value("\${$CORDA_USER_PASSWORD}") private val password: String,
-				@Value("\${$CORDA_RPC_PORT}") private val rpcPort: Int) : AutoCloseable {
+        @Value("\${$CORDA_NODE_HOST}") private val host: String,
+        @Value("\${$CORDA_USER_NAME}") private val username: String,
+        @Value("\${$CORDA_USER_PASSWORD}") private val password: String,
+        @Value("\${$CORDA_RPC_PORT}") private val rpcPort: Int) : AutoCloseable {
 
-		lateinit var rpcConnection: CordaRPCConnection private set
-		lateinit var proxy: CordaRPCOps private set
+    lateinit var rpcConnection: CordaRPCConnection private set
+    lateinit var proxy: CordaRPCOps private set
 
-		@PostConstruct
-		fun initialiseNodeRPCConnection() {
-				val rpcAddress = NetworkHostAndPort(host, rpcPort)
-				val rpcClient = CordaRPCClient(rpcAddress)
-				val rpcConnection = rpcClient.start(username, password)
-				proxy = rpcConnection.proxy
-		}
+    @PostConstruct
+    fun initialiseNodeRPCConnection() {
+        val rpcAddress = NetworkHostAndPort(host, rpcPort)
+        val rpcClient = CordaRPCClient(rpcAddress)
+        val rpcConnection = rpcClient.start(username, password)
+        proxy = rpcConnection.proxy
+    }
 
-		@PreDestroy
-		override fun close() {
-				rpcConnection.notifyServerAndClose()
-		}
+    @PreDestroy
+    override fun close() {
+        rpcConnection.notifyServerAndClose()
+    }
 }
