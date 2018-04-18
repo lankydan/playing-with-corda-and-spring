@@ -21,6 +21,8 @@
       <module name="domain_test" target="1.8" />
       <module name="logging_main" target="1.8" />
       <module name="logging_test" target="1.8" />
+      <module name="playing-with-corda-and-spring_main" target="1.8" />
+      <module name="playing-with-corda-and-spring_test" target="1.8" />
       <module name="rate-provider-api_main" target="1.8" />
       <module name="rate-provider-api_test" target="1.8" />
       <module name="rate-provider_main" target="1.8" />

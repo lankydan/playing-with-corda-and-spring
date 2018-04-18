@@ -38,9 +38,11 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
     }
 
     @PostMapping("/issue")
-    fun issue(@RequestParam("amount") amount: Int,
-              @RequestParam("currency") currency: String,
-              @RequestParam("party") party: String): /*ResponseEntity<SignedTransaction>*/ ResponseEntity<String> {
+    fun issue(
+            @RequestParam("amount") amount: Int,
+            @RequestParam("currency") currency: String,
+            @RequestParam("party") party: String
+    ): /*ResponseEntity<SignedTransaction>*/ ResponseEntity<String> {
         val uuid = UUID.randomUUID()
         log.info("[$uuid] Received issue request for $currency $amount to $party")
         // Get party objects for myself and the counterparty.
@@ -71,7 +73,7 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
             log.info("[$uuid] Transaction time of ${end - start}")
             send("Event [$uuid] - Transaction time of ${end - start}")
             ResponseEntity.ok()
-                    .body(mapper.writeValueAsString(result.id))
+                    .body(mapper.writeValueAsString(result))
             // For the purposes of this demo app, we do not differentiate by exception type.
         } catch (e: Exception) {
             ResponseEntity.badRequest()

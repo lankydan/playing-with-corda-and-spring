@@ -53,3 +53,7 @@ And you can access the REST endpoints at:
 For example, you can check the node's status using:
 
     `localhost:10011/status`
+    
+ ```
+ java -Xmx512m -Dlog4j.configurationFile=../../../src/main/resources/log4j2.xml -javaagent:drivers/jolokia-jvm-1.3.7-agent.jar=port=7006 -jar corda.jar
+ ```
