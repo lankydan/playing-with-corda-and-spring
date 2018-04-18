@@ -74,36 +74,37 @@ dependencies {
     cordapp "$corda_release_group:corda-finance:$corda_release_version"
 
     compile("org.springframework.boot:spring-boot-starter-tomcat:$spring_boot_version")
-    compile("org.springframework.boot:spring-boot-starter-web:$spring_boot_version") {
-        //        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
-        exclude group: 'org.slf4j', module: 'slf4j'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
-        exclude group: 'ch.qos.logback', module: 'logback-classic'
-    }
-    compile("org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version") {
-//        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
-        exclude group: 'org.slf4j', module: 'slf4j'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
-        exclude group: 'ch.qos.logback', module: 'logback-classic'
-    }
+//    compile("org.springframework.boot:spring-boot-starter-web:$spring_boot_version") {
+//        //        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+//        exclude group: 'org.slf4j', module: 'slf4j'
+//        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+//        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+//        exclude group: 'ch.qos.logback', module: 'logback-classic'
+//    }
+//    compile("org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version") {
+////        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
+//        exclude group: 'org.slf4j', module: 'slf4j'
+//        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+//        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+//        exclude group: 'ch.qos.logback', module: 'logback-classic'
+//    }
 //    compile group: 'org.springframework', name: 'spring-messaging', version: '4.2.4.RELEASE'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.11.0'
-    compile("org.webjars:stomp-websocket:2.3.3")
-    compile group: 'org.webjars', name: 'webjars-locator-core', version: '0.35'
-//    compile group: 'javax.websocket', name: 'javax.websocket-api', version: '1.1'
-//    compile group: 'org.apache.tomcat', name: 'tomcat7-websocket', version: '7.0.47'
-    compile("org.webjars:sockjs-client:1.0.2")
-    compile("org.webjars:bootstrap:3.3.7")
-    compile("org.webjars:jquery:3.1.0")
-//    compile.exclude  module: 'spring-boot-starter-jetty'
+//    compile group: 'org.apache.logging.log4j', name: 'log4j-web', version: '2.11.0'
+//    compile("org.webjars:stomp-websocket:2.3.3")
+//    compile group: 'org.webjars', name: 'webjars-locator-core', version: '0.35'
+
+//    compile("org.webjars:sockjs-client:1.0.2")
+//    compile("org.webjars:bootstrap:3.3.7")
+//    compile("org.webjars:jquery:3.1.0")
+
+    cordapp project(":cordapp")
+    cordapp project(":cordapp-contracts-states")
 }
 
-jar {
-    baseName = 'gs-messaging-stomp-websocket'
-    version = '0.1.0'
-}
+//jar {
+//    baseName = 'gs-messaging-stomp-websocket'
+//    version = '0.1.0'
+//}
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
@@ -119,33 +120,50 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     node {
         name "O=Notary,L=London,C=GB"
         notary = [validating: true]
-        p2pPort 10002
-        cordapps = ["$corda_release_group:corda-finance:$corda_release_version"]
+        p2pPort 10001
+        rpcUsers = [[user: "user1", "password": "test", "permissions": ["ALL"]]]
+        rpcSettings {
+            address("localhost:10005")
+            adminAddress("localhost:10045")
+        }
+        cordapps = [
+                "$project.group:cordapp-contracts-states:$project.version",
+                "$project.group:cordapp:$project.version",
+                "$corda_release_group:corda-finance:$corda_release_version"
+        ]
 //        net.corda.plugins.Node.configFileProperty="C:/dev/projects/corda_projects/playing-with-corda-and-spring/src/main/resources/general-node.conf"
 //        configFile = "C:/dev/projects/corda_projects/playing-with-corda-and-spring/src/main/resources/general-node.conf"
     }
     node {
         name "O=PartyA,L=London,C=GB"
-        p2pPort 10005
+        p2pPort 10002
 //    webPort 10007
         rpcSettings {
             address("localhost:10006")
             adminAddress("localhost:10046")
         }
         rpcUsers = [[user: "user1", "password": "test", "permissions": ["ALL"]]]
-        cordapps = ["$corda_release_group:corda-finance:$corda_release_version"]
+        cordapps = [
+                "$project.group:cordapp-contracts-states:$project.version",
+                "$project.group:cordapp:$project.version",
+                "$corda_release_group:corda-finance:$corda_release_version"
+        ]
 //        configFile = "C:/dev/projects/corda_projects/playing-with-corda-and-spring/src/main/resources/general-node.conf"
     }
     node {
         name "O=PartyB,L=London,C=GB"
-        p2pPort 10008
+        p2pPort 10003
 //    webPort 10018
         rpcSettings {
             address("localhost:10009")
             adminAddress("localhost:10049")
         }
         rpcUsers = [[user: "user1", "password": "test", "permissions": ["ALL"]]]
-        cordapps = ["$corda_release_group:corda-finance:$corda_release_version"]
+        cordapps = [
+                "$project.group:cordapp-contracts-states:$project.version",
+                "$project.group:cordapp:$project.version",
+                "$corda_release_group:corda-finance:$corda_release_version"
+        ]
 //        configFile = "C:/dev/projects/corda_projects/playing-with-corda-and-spring/src/main/resources/general-node.conf"
     }
 }

@@ -15,6 +15,9 @@
       <module name="corda-fx-adapter_test" target="1.8" />
       <module name="corda-spring_main" target="1.8" />
       <module name="corda-spring_test" target="1.8" />
+      <module name="cordapp-contracts-states_main" target="1.8" />
+      <module name="cordapp-contracts-states_test" target="1.8" />
+      <module name="cordapp_integrationTest" target="1.8" />
       <module name="cordapp_main" target="1.8" />
       <module name="cordapp_test" target="1.8" />
       <module name="domain_main" target="1.8" />

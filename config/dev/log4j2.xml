@@ -3,7 +3,7 @@
 <!--java -Dlog4j.configurationFile=C:\Development\corda\spring-webserver\config\dev\log4j2.xml -jar corda.jar-->
     <Properties>
         <Property name="log-path">logs</Property>
-        <Property name="log-name">node-${hostName}-does-this-work</Property>
+        <Property name="log-name">node-${hostName}</Property>
         <Property name="archive">${log-path}/archive</Property>
     </Properties>
 
@@ -13,7 +13,7 @@
         <Console name="Console-Appender" target="SYSTEM_OUT">
             <PatternLayout>
                 <pattern>
-                    %highlight{%level{length=1} %d{HH:mm:ss} %T %c{1}.%M - %msg%n}{INFO=white,WARN=red,FATAL=bright red blink}
+                    %highlight{%level %d{HH:mm:ss} %T %c{1}.%M - %msg%n}{INFO=white,WARN=red,FATAL=bright red blink}
                 </pattern>>
             </PatternLayout>
         </Console>
