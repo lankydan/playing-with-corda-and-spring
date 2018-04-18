@@ -1,8 +1,6 @@
 buildscript {
     ext.spring_boot_version = '1.5.7.RELEASE'
-//    ext.spring_boot_version = '1.5.12.RELEASE'
     ext.spring_version = '4.3.11.RELEASE'
-//    ext.spring_version = '4.3.16.RELEASE'
 }
 
 repositories {
@@ -32,23 +30,18 @@ sourceSets {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testCompile "junit:junit:$junit_version"
+    testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
 
-    // Corda integration dependencies
     cordaCompile "$corda_release_group:corda-core:$corda_release_version"
     cordaCompile "$corda_release_group:corda-finance:$corda_release_version"
     cordaCompile "$corda_release_group:corda-jackson:$corda_release_version"
     cordaCompile "$corda_release_group:corda-rpc:$corda_release_version"
     cordaCompile "$corda_release_group:corda-node-api:$corda_release_version"
-//    cordaCompile "$corda_release_group:corda-webserver-impl:$corda_release_version"
     cordaRuntime "$corda_release_group:corda:$corda_release_version"
-//    cordaRuntime "$corda_release_group:corda-webserver:$corda_release_version"
 
-    testCompile "$corda_release_group:corda-node-driver:$corda_release_version"
-
-    cordapp project(":cordapp-contracts-states")
     cordaCompile("$corda_release_group:corda-webserver-impl:$corda_release_version") {
         exclude group: 'org.eclipse.jetty', module: 'jetty-webapp'
         exclude group: 'org.eclipse.jetty', module: 'jetty-servlet'
@@ -57,24 +50,7 @@ dependencies {
         exclude group: 'org.glassfish.jersey.containers', module: 'jersey-container-jetty-http'
     }
 
-    compile("org.springframework.boot:spring-boot-starter-tomcat:$spring_boot_version")
-    compile("org.springframework.boot:spring-boot-starter-web:$spring_boot_version") {
-        //        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
-        exclude group: 'org.slf4j', module: 'slf4j'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
-        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
-        exclude group: 'ch.qos.logback', module: 'logback-classic'
-    }
-    compile("org.springframework.boot:spring-boot-starter-tomcat:$spring_boot_version")
-    //    compile("org.springframework.boot:spring-boot-starter-web:$spring_boot_version") {
-//        //        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
-//        exclude group: 'org.slf4j', module: 'slf4j'
-//        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
-//        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
-//        exclude group: 'ch.qos.logback', module: 'logback-classic'
-//    }
     compile("org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version") {
-//        exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
         exclude group: 'org.slf4j', module: 'slf4j'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
@@ -88,6 +64,8 @@ dependencies {
     compile("org.webjars:sockjs-client:1.0.2")
     compile("org.webjars:bootstrap:3.3.7")
     compile("org.webjars:jquery:3.1.0")
+
+    cordapp project(":cordapp-contracts-states")
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
