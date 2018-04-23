@@ -57,7 +57,7 @@ class IOUContract : Contract {
                 "Only the lender property may change." using (input == output.withNewLender(input.lender))
                 "The lender property must change in a transfer." using (input.lender != output.lender)
                 "The borrower, old lender and new lender only must sign an IOU transfer transaction" using
-                        (command.signers.toSet() == (input.participants.map { it.owningKey }.toSet() `union`
+                        (command.signers.toSet() == (input.participants.map { it.owningKey }.toSet() union
                                 output.participants.map { it.owningKey }.toSet()))
             }
             is Commands.Settle -> {
