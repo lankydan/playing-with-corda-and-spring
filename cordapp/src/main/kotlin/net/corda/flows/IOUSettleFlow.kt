@@ -60,7 +60,7 @@ class IOUSettleFlow(val linearId: UniqueIdentifier, val amount: Amount<Currency>
     }
 
     private fun validateCash(amount: Amount<Currency>) {
-        val cash = serviceHub.getCashBalances().get(amount.token)
+        val cash = serviceHub.getCashBalances()[amount.token]
         requireThat {
             "Borrower has no ${amount.token} to settle." using (cash != null && cash.quantity > 0)
             "Borrower has only ${cash?.quantity} ${cash?.token} but needs ${amount.quantity} ${amount.token} to settle." using (cash!! >= amount)

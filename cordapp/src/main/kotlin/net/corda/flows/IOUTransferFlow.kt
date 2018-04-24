@@ -37,16 +37,21 @@ class IOUTransferFlow(val linearId: UniqueIdentifier, val newLender: Party) : Fl
         transaction.addCommand(Command(IOUContract.Commands.Transfer(), participants.map { it.owningKey }))
         transaction.verify(serviceHub)
         val singleSignedTransaction = serviceHub.signInitialTransaction(transaction)
-        val sessions = (participants - ourIdentity).map { initiateFlow(it) }.toSet()
+        val sessions = (participants.distinct() - ourIdentity).distinct().map { initiateFlow(it) }.toSet()
         val allSignedTransaction = subFlow(CollectSignaturesFlow(singleSignedTransaction, sessions))
         return subFlow(FinalityFlow(allSignedTransaction))
     }
 
     private fun stateAndRef(): StateAndRef<IOUState> {
-        val query = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+        val query = queryCriteria()
         return serviceHub.vaultService.queryBy<IOUState>(query)
                 .states
                 .single()
+    }
+
+    private fun queryCriteria(): QueryCriteria.LinearStateQueryCriteria {
+        return if (linearId.externalId == null) QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+                else QueryCriteria.LinearStateQueryCriteria(externalId = listOf(linearId.externalId!!))
     }
 
     private fun validateLender(state: IOUState) {

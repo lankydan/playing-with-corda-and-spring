@@ -2,11 +2,14 @@ package net.corda.server.controllers
 
 import net.corda.client.jackson.JacksonSupport
 import net.corda.core.contracts.Amount
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.messaging.vaultQueryBy
 import net.corda.core.utilities.loggerFor
 import net.corda.flows.IOUIssueFlow
+import net.corda.flows.IOUSettleFlow
+import net.corda.flows.IOUTransferFlow
 import net.corda.server.NodeRPCConnection
 import net.corda.states.IOUState
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -51,7 +54,10 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
                 ?: throw IllegalArgumentException("Unknown party name.")
         // Create a new IOU state using the parameters given.
         return try {
-            val state = IOUState(Amount(amount.toLong() * 100, Currency.getInstance(currency)), lender, me)
+            val state = IOUState(amount = Amount(amount.toLong() * 100, Currency.getInstance(currency)),
+                    lender = lender,
+                    borrower = me,
+                    linearId = UniqueIdentifier(UUID.randomUUID().toString()))
             // Start the IOUIssueFlow. We block and waits for the flow to return.
             val start = System.currentTimeMillis()
             log.info("[$uuid] Calling issue flow at ${LocalDateTime.now()}")
@@ -76,12 +82,42 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
                     .body(mapper.writeValueAsString(result))
             // For the purposes of this demo app, we do not differentiate by exception type.
         } catch (e: Exception) {
-            ResponseEntity.badRequest()
-                    .build()
+            ResponseEntity.badRequest().body(e.message)
         }
     }
 
     private fun send(message: String) {
         template.convertAndSend("/flows/monitoring", message)
+    }
+
+    @PutMapping("transfer")
+    fun transfer(@RequestParam("id") id: String,
+                 @RequestParam("party") party: String): ResponseEntity<String> {
+        val lender = proxy.wellKnownPartyFromX500Name(CordaX500Name.parse(party))
+                ?: throw IllegalArgumentException("Unknown party name.")
+        val linearId = UniqueIdentifier(id)
+        return try {
+            val flowProgressHandle = proxy.startTrackedFlow(::IOUTransferFlow, linearId, lender)
+            val result = flowProgressHandle.returnValue.get()
+            ResponseEntity.ok()
+                    .body(mapper.writeValueAsString(result))
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().body(e.message)
+        }
+    }
+
+    @PutMapping("settle")
+    fun settle(@RequestParam("id") id: String,
+               @RequestParam("amount") amount: Int,
+               @RequestParam("currency") currency: String): ResponseEntity<String> {
+        val linearId = UniqueIdentifier(id)
+        val currencyAmount = Amount(amount.toLong() * 100, Currency.getInstance(currency))
+        return try {
+            val flowProgressHandle = proxy.startTrackedFlow(::IOUSettleFlow, linearId, currencyAmount)
+            val result = flowProgressHandle.returnValue.get()
+            ResponseEntity.ok().body(mapper.writeValueAsString(result))
+        } catch (e: Exception) {
+            ResponseEntity.badRequest().body(e.message)
+        }
     }
 }

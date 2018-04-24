@@ -101,6 +101,28 @@ class IOUTransferFlowTests {
                 mockNetwork.defaultNotaryNode.info.legalIdentitiesAndCerts.first().owningKey)
     }
 
+    @Test
+    fun externalIdCanBeUsedToRetrieveTheState() {
+        val lender = a.info.chooseIdentityAndCert().party
+        val borrower = b.info.chooseIdentityAndCert().party
+        val stx = issueIou(IOUState(10.POUNDS, lender, borrower, linearId = UniqueIdentifier("Dans test id")))
+        val linearId = UniqueIdentifier(externalId = "Dans test id")
+        val flow = IOUTransferFlow(linearId, c.info.chooseIdentityAndCert().party)
+        val future = a.startFlow(flow)
+        mockNetwork.runNetwork()
+        val ptx = future.getOrThrow()
+        assert(ptx.tx.inputs.size == 1)
+        assert(ptx.tx.outputs.size == 1)
+        assert(ptx.tx.inputs.single() == StateRef(stx.id, 0))
+        println("Input state ref: ${ptx.tx.inputs.single()} == ${StateRef(stx.id, 0)}")
+        val outputIou = ptx.tx.outputs.single().data as IOUState
+        println("Output state: $outputIou")
+        val command = ptx.tx.commands.single()
+        assert(command.value == IOUContract.Commands.Transfer())
+        ptx.verifySignaturesExcept(b.info.chooseIdentityAndCert().party.owningKey, c.info.chooseIdentityAndCert().party.owningKey,
+                mockNetwork.defaultNotaryNode.info.legalIdentitiesAndCerts.first().owningKey)
+    }
+
     /**
      * Task 2.
      * We need to make sure that only the current lender can execute this flow.
