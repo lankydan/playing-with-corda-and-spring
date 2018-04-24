@@ -17,6 +17,13 @@ import java.util.*
  * - [linearId] A unique id shared by all LinearState states representing the same agreement throughout history within
  *   the vaults of all parties. Verify methods should check that one input and one output share the id in a transaction,
  *   except at issuance/termination.
+ *
+ *
+ *   The parties that this state keeps track of suggests that each and every party is a node by itself.
+ *   Practically this cannot be true as each customer would require a node for each of their accounts.
+ *   Therefore surely extra fields of customer account that represent a customer's account on either party
+ *   involved in the transaction + state. The parties still need to be included as they represent the nodes
+ *   and we need to know which node a customer lives on.
  */
 data class IOUState(val amount: Amount<Currency>,
                     val lender: Party,
