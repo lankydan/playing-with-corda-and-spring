@@ -35,7 +35,6 @@ class IOUSettleFlow(val linearId: UniqueIdentifier, val amount: Amount<Currency>
         val counterparty = state.lender
         val transaction = TransactionBuilder(notary = stateAndRef.state.notary)
 
-//        val (_, keys) = Cash.generateSpend(serviceHub, transaction, listOf(PartyAndAmount(state.lender, amount)), ourIdentityAndCert)
         val (_, keys) = Cash.generateSpend(serviceHub, transaction, amount, ourIdentityAndCert, counterparty)
 
         transaction.addInputState(stateAndRef)
@@ -58,10 +57,6 @@ class IOUSettleFlow(val linearId: UniqueIdentifier, val amount: Amount<Currency>
         // Step 9. Collecting missing signatures
         val signedByAllPartiesTransaction = subFlow(CollectSignaturesFlow(singleSignedTransaction, listOf(session), myOptionalKeys = keysToSign))
 
-//        val singleSignedTransaction = serviceHub.signInitialTransaction(transaction)
-//        val sessions = (state.participants.distinct() /*- ourIdentity*/).distinct().map { initiateFlow(it) }.toSet()
-
-//        val signedByAllPartiesTransaction = subFlow(CollectSignaturesFlow(singleSignedTransaction, sessions))
         return subFlow(FinalityFlow(signedByAllPartiesTransaction))
 
     }
@@ -90,10 +85,6 @@ class IOUSettleFlow(val linearId: UniqueIdentifier, val amount: Amount<Currency>
             "Borrower has no ${amount.token} to settle." using (cash != null && cash.quantity > 0)
             "Borrower has only ${cash?.toDecimal()} ${cash?.token} but needs ${amount.toDecimal()} ${amount.token} to settle." using (cash!! >= amount)
         }
-    }
-
-    private fun notary(): Party {
-        return serviceHub.networkMapCache.notaryIdentities.first()
     }
 }
 
