@@ -15,7 +15,7 @@ import java.time.ZoneId
  */
 @RestController
 @RequestMapping("/") // The paths for GET and POST requests are relative to this base path.
-private class StandardController(
+class StandardController(
         private val rpc: NodeRPCConnection) {
 
     companion object {

@@ -1,6 +1,7 @@
 package net.corda.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import net.corda.confidential.IdentitySyncFlow
 import net.corda.contracts.IOUContract
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
@@ -11,7 +12,6 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.contracts.asset.Cash
-import net.corda.finance.contracts.asset.PartyAndAmount
 import net.corda.finance.contracts.getCashBalances
 import net.corda.finance.flows.CashIssueFlow
 import net.corda.states.IOUState
@@ -32,25 +32,50 @@ class IOUSettleFlow(val linearId: UniqueIdentifier, val amount: Amount<Currency>
         val state = stateAndRef.state.data
         validateIdentity(state)
         validateCash(amount)
-        val transaction = TransactionBuilder(notary = notary())
+        val counterparty = state.lender
+        val transaction = TransactionBuilder(notary = stateAndRef.state.notary)
 
-        Cash.generateSpend(serviceHub, transaction, listOf(PartyAndAmount(state.lender, amount)), ourIdentityAndCert)
+//        val (_, keys) = Cash.generateSpend(serviceHub, transaction, listOf(PartyAndAmount(state.lender, amount)), ourIdentityAndCert)
+        val (_, keys) = Cash.generateSpend(serviceHub, transaction, amount, ourIdentityAndCert, counterparty)
 
         transaction.addInputState(stateAndRef)
-        transaction.addOutputState(state.pay(amount), IOUContract.IOU_CONTRACT_ID)
+        val output = state.pay(amount)
+        if (output.paid < output.amount) {
+            transaction.addOutputState(output, IOUContract.IOU_CONTRACT_ID)
+        }
         transaction.addCommand(Command(IOUContract.Commands.Settle(), state.participants.map { it.owningKey }))
         transaction.verify(serviceHub)
-        val singleSignedTransaction =  serviceHub.signInitialTransaction(transaction)
-        val sessions = (state.participants - ourIdentity).map { initiateFlow(it) }.toSet()
-        val signedByAllPartiesTransaction = subFlow(CollectSignaturesFlow(singleSignedTransaction, sessions))
+
+        // We need to sign transaction with all keys referred from Cash input states + our public key
+        val keysToSign = (keys.toSet() + ourIdentity.owningKey).toList()
+        val singleSignedTransaction = serviceHub.signInitialTransaction(transaction, keysToSign)
+        // Initialising session with other party
+        val session = initiateFlow(counterparty)
+
+        // Sending other party our identities so they are aware of anonymous public keys
+        subFlow(IdentitySyncFlow.Send(session, singleSignedTransaction.tx))
+
+        // Step 9. Collecting missing signatures
+        val signedByAllPartiesTransaction = subFlow(CollectSignaturesFlow(singleSignedTransaction, listOf(session), myOptionalKeys = keysToSign))
+
+//        val singleSignedTransaction = serviceHub.signInitialTransaction(transaction)
+//        val sessions = (state.participants.distinct() /*- ourIdentity*/).distinct().map { initiateFlow(it) }.toSet()
+
+//        val signedByAllPartiesTransaction = subFlow(CollectSignaturesFlow(singleSignedTransaction, sessions))
         return subFlow(FinalityFlow(signedByAllPartiesTransaction))
+
     }
 
     private fun stateAndRef(): StateAndRef<IOUState> {
-        val query = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+        val query = queryCriteria()
         return serviceHub.vaultService.queryBy<IOUState>(query)
                 .states
                 .single()
+    }
+
+    private fun queryCriteria(): QueryCriteria.LinearStateQueryCriteria {
+        return if (linearId.externalId == null) QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+        else QueryCriteria.LinearStateQueryCriteria(externalId = listOf(linearId.externalId!!))
     }
 
     private fun validateIdentity(state: IOUState) {
@@ -63,7 +88,7 @@ class IOUSettleFlow(val linearId: UniqueIdentifier, val amount: Amount<Currency>
         val cash = serviceHub.getCashBalances()[amount.token]
         requireThat {
             "Borrower has no ${amount.token} to settle." using (cash != null && cash.quantity > 0)
-            "Borrower has only ${cash?.quantity} ${cash?.token} but needs ${amount.quantity} ${amount.token} to settle." using (cash!! >= amount)
+            "Borrower has only ${cash?.toDecimal()} ${cash?.token} but needs ${amount.toDecimal()} ${amount.token} to settle." using (cash!! >= amount)
         }
     }
 
@@ -80,13 +105,11 @@ class IOUSettleFlow(val linearId: UniqueIdentifier, val amount: Amount<Currency>
 class IOUSettleFlowResponder(val flowSession: FlowSession) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
+        subFlow(IdentitySyncFlow.Receive(flowSession))
         val signedTransactionFlow = object : SignTransactionFlow(flowSession) {
-            override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val outputStates = stx.tx.outputs.map { it.data::class.java.name }.toList()
-                "There must be an IOU transaction." using (outputStates.contains(IOUState::class.java.name))
+            override fun checkTransaction(stx: SignedTransaction) {
             }
         }
-
         subFlow(signedTransactionFlow)
     }
 }

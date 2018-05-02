@@ -82,7 +82,7 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
                     .body(mapper.writeValueAsString(result))
             // For the purposes of this demo app, we do not differentiate by exception type.
         } catch (e: Exception) {
-            ResponseEntity.badRequest().body(e.message)
+            ResponseEntity.badRequest().body(mapper.writeValueAsString(e.message))
         }
     }
 
@@ -90,7 +90,7 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
         template.convertAndSend("/flows/monitoring", message)
     }
 
-    @PutMapping("transfer")
+    @PutMapping("/transfer")
     fun transfer(@RequestParam("id") id: String,
                  @RequestParam("party") party: String): ResponseEntity<String> {
         val lender = proxy.wellKnownPartyFromX500Name(CordaX500Name.parse(party))
@@ -102,11 +102,11 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
             ResponseEntity.ok()
                     .body(mapper.writeValueAsString(result))
         } catch (e: Exception) {
-            ResponseEntity.badRequest().body(e.message)
+            ResponseEntity.badRequest().body(mapper.writeValueAsString(e.message))
         }
     }
 
-    @PutMapping("settle")
+    @PutMapping("/settle")
     fun settle(@RequestParam("id") id: String,
                @RequestParam("amount") amount: Int,
                @RequestParam("currency") currency: String): ResponseEntity<String> {
@@ -117,7 +117,7 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
             val result = flowProgressHandle.returnValue.get()
             ResponseEntity.ok().body(mapper.writeValueAsString(result))
         } catch (e: Exception) {
-            ResponseEntity.badRequest().body(e.message)
+            ResponseEntity.badRequest().body(mapper.writeValueAsString(e.message))
         }
     }
 }

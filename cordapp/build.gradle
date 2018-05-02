@@ -1,6 +1,5 @@
 buildscript {
-    ext.spring_boot_version = '1.5.7.RELEASE'
-    ext.spring_version = '4.3.11.RELEASE'
+    ext.spring_boot_version = '2.0.1.RELEASE'
 }
 
 repositories {
@@ -52,8 +51,10 @@ dependencies {
 
     compile("org.springframework.boot:spring-boot-starter-websocket:$spring_boot_version") {
         exclude group: 'org.slf4j', module: 'slf4j'
+        exclude group: 'org.slf4j', module: 'jul-to-slf4j'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
         exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-to-slf4j'
         exclude group: 'ch.qos.logback', module: 'logback-classic'
     }
 
