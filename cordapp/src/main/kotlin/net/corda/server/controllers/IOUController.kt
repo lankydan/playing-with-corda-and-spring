@@ -7,6 +7,7 @@ import net.corda.core.identity.CordaX500Name
 import net.corda.core.messaging.startTrackedFlow
 import net.corda.core.messaging.vaultQueryBy
 import net.corda.core.utilities.loggerFor
+import net.corda.finance.contracts.getCashBalances
 import net.corda.flows.IOUIssueFlow
 import net.corda.flows.IOUSettleFlow
 import net.corda.flows.IOUTransferFlow
@@ -110,6 +111,7 @@ class IOUController(rpc: NodeRPCConnection, private val template: SimpMessagingT
     fun settle(@RequestParam("id") id: String,
                @RequestParam("amount") amount: Int,
                @RequestParam("currency") currency: String): ResponseEntity<String> {
+
         val linearId = UniqueIdentifier(id)
         val currencyAmount = Amount(amount.toLong() * 100, Currency.getInstance(currency))
         return try {

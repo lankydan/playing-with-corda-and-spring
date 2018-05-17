@@ -1,11 +1,11 @@
 package net.corda.states
 
+import net.corda.contracts.IOUContract
 import net.corda.core.contracts.Amount
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
-import net.corda.contracts.IOUContract
-import java.util.*
+import java.util.Currency
 
 /**
  * The IOU State object, with the following properties:

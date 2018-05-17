@@ -19,7 +19,8 @@ import net.corda.states.IOUState
 class IOUContract : Contract {
     companion object {
         @JvmStatic
-        val IOU_CONTRACT_ID = "net.corda.contracts.IOUContract"
+//        val IOU_CONTRACT_ID = "net.corda.contracts.IOUContract"
+        val IOU_CONTRACT_ID = IOUContract::class.toString()
     }
 
     /**
@@ -59,6 +60,9 @@ class IOUContract : Contract {
                 "The borrower, old lender and new lender only must sign an IOU transfer transaction" using
                         (command.signers.toSet() == (input.participants.map { it.owningKey }.toSet() union
                                 output.participants.map { it.owningKey }.toSet()))
+                // added the below check since I can transfer the iou to the lender meaning that borrower == lender which makes no sense
+                // leads to issues signing transactions later on
+//                "The lender and borrower cannot have the same identity." using (output.borrower != output.lender)
             }
             is Commands.Settle -> {
                 // Check there is only one group of IOUs and that there is always an input IOU.
