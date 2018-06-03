@@ -95,7 +95,7 @@ Let's look at one of the <code>requireThat</code> statements a bit more closely:
 [gist https://gist.github.com/lankydan/7fb78a968168b27f114b9cacdd7e0c51 /]
 
 Theres not much to explain here. The DSL takes care of the intent of the statement. What I will point out is the syntax:
-<pre><string message of what condition should be met> using <condition it must pass>
+<pre>&lt;string message of what condition should be met&gt; using &lt;condition it must pass&gt;
 </pre>
 Quite simple. A point that stupidly caught me out a bit, if the condition contains spaces in it then it must be contained within brackets. Finally, the DSL can contain code that is not in a condition expression, allowing you to initialise variables and such which can then be used in the actual conditions.
 
