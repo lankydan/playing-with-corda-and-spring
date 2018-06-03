@@ -29,7 +29,7 @@ data class IOUState(val amount: Amount<Currency>,
                     val lender: Party,
                     val borrower: Party,
                     val paid: Amount<Currency> = Amount(0, amount.token),
-                    override val linearId: UniqueIdentifier = UniqueIdentifier()) : LinearState {
+                    override val linearId: UniqueIdentifier = UniqueIdentifier(),) : LinearState {
     /**
      *  This property holds a list of the nodes which can "use" this state in a valid transaction. In this case, the
      *  lender or the borrower.

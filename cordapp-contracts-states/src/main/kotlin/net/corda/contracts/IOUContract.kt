@@ -20,7 +20,7 @@ class IOUContract : Contract {
     companion object {
         @JvmStatic
 //        val IOU_CONTRACT_ID = "net.corda.contracts.IOUContract"
-        val IOU_CONTRACT_ID = IOUContract::class.toString()
+        val IOU_CONTRACT_ID = IOUContract::class.qualifiedName!!
     }
 
     /**
